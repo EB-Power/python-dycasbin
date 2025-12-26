@@ -65,7 +65,7 @@ def test_delete_role():
     assert result == False
 
 
-def test_add_permission_for_user():
+def test_add_permission_for_user_case1():
     e.add_permission_for_user('bob', 'read')
     result = e.has_permission_for_user('bob', 'read')
     assert result == True
@@ -79,7 +79,7 @@ def test_delete_permission():
     assert result == False
 
 
-def test_add_permission_for_user():
+def test_add_permission_for_user_case2():
     e.add_permission_for_user('alice', 'write')
     result = e.delete_permission_for_user('alice', 'write')
     assert result == True
@@ -87,7 +87,7 @@ def test_add_permission_for_user():
     assert result == False
 
 
-def test_delete_permissions_for_user():
+def test_delete_permissions_for_user_case1():
     e.add_permission_for_user('alice', 'write')
     e.add_permission_for_user('alice', 'read')
     result = e.delete_permissions_for_user('alice')
@@ -98,7 +98,7 @@ def test_delete_permissions_for_user():
     assert result == False
 
 
-def test_delete_permissions_for_user():
+def test_delete_permissions_for_user_case2():
     e.add_permission_for_user('alice', 'write')
     e.add_permission_for_user('alice', 'read')
     result = e.get_permissions_for_user('alice')
@@ -123,14 +123,14 @@ def test_get_roles_for_user_in_domain():
     assert result == ['data2_admin', 'data3_admin']
 
 
-def test_get_permissions_for_user_in_domain():
+def test_get_permissions_for_user_in_domain_case1():
     e.add_role_for_user_in_domain('alice', 'data3_admin', 'domain1')
     e.add_role_for_user_in_domain('alice', 'data2_admin', 'domain1')
     result = e.get_permissions_for_user_in_domain('alice', 'domain1')
     assert result == []
 
 
-def test_get_permissions_for_user_in_domain():
+def test_get_permissions_for_user_in_domain_case2():
     e.delete_roles_for_user_in_domain('alice', 'data3_admin', 'domain1')
     result = e.get_roles_for_user_in_domain('alice', 'domain1')
     result.sort()
