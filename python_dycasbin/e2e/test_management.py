@@ -31,8 +31,8 @@ def test_enforcer():
 
     result_false = e.enforce('ham', 'data5', 'write')
 
-    assert result_true == True
-    assert result_false == False
+    assert result_true is True
+    assert result_false is False
 
 
 def test_enforce_ex():
@@ -92,7 +92,7 @@ def test_get_all_named_actions():
 def test_add_role_for_user():
     result = e.add_role_for_user('bob', 'admin')
 
-    assert result == True
+    assert result is True
 
 
 def test_get_all_roles():
@@ -144,26 +144,26 @@ def test_get_named_grouping_policy():
 
 def test_has_policy():
     result = e.has_policy('ham', 'data4', 'write')
-    assert result == True
+    assert result is True
     result = e.has_policy('ham', 'data4', 'read')
-    assert result == False
+    assert result is False
 
 
 def test_has_named_policy():
     result = e.has_named_policy('p', 'ham', 'data4', 'write')
-    assert result == True
+    assert result is True
     result = e.has_policy('p', 'ham', 'data4', 'read')
-    assert result == False
+    assert result is False
 
 
 def test_add_named_policy():
     name_policy = e.add_named_grouping_policy('g', 'ham', 'data_g', 'read')
-    assert name_policy == True
+    assert name_policy is True
 
 
 def test_remove_policy():
     result = e.remove_policy('ham', 'data4', 'write')
-    assert result == True
+    assert result is True
     result = e.get_policy()
     assert result == [['alice', 'data5', 'read']]
 
@@ -171,12 +171,12 @@ def test_remove_policy():
 def test_remove_policies():
     # Not implemented
     result = e.remove_policies('ham')
-    assert result == False
+    assert result is False
 
 
 def test_remove_filtered_policy():
     result = e.remove_filtered_policy(0, 'alice', 'data5', 'read')
-    assert result == True
+    assert result is True
     result = e.get_policy()
     assert result == []
 
@@ -184,7 +184,7 @@ def test_remove_filtered_policy():
 def test_remove_named_policy():
     r = e.add_named_policy('p', 'david', 'files', 'read')
     result = e.remove_named_policy('p', 'david', 'files', 'read')
-    assert result == True
+    assert result is True
     result = e.get_policy()
     assert result == []
 
@@ -198,30 +198,30 @@ def test_remove_policies():
 def test_remove_filtered_named_policy():
     r = e.add_named_policy('p', 'david', 'images', 'write')
     result = e.remove_filtered_named_policy('p', 0, 'david', 'images', 'write')
-    assert result == True
+    assert result is True
     result = e.get_policy()
     assert result == []
 
 
 def test_has_grouping_policy():
     result = e.has_grouping_policy('bob', 'admin')
-    assert result == True
+    assert result is True
     result = e.has_grouping_policy('bob', 'admin2')
-    assert result == False
+    assert result is False
 
 
 def test_has_named_grouping_policy():
     result = e.has_named_grouping_policy('g', 'bob', 'admin')
-    assert result == True
+    assert result is True
     result = e.has_named_grouping_policy('g', 'bob', 'admin2')
-    assert result == False
+    assert result is False
 
 
 def test_add_grouping_policy():
     result = e.add_grouping_policy('group1', 'data2_admin')
-    assert result == True
+    assert result is True
     result = e.has_grouping_policy('group1', 'data2_admin')
-    assert result == True
+    assert result is True
 
 
 def test_add_grouping_policies():
@@ -230,15 +230,15 @@ def test_add_grouping_policies():
         ['ham', 'data4_admin'],
         ['jack', 'data5_admin']
     ])
-    assert result == False
+    assert result is False
 
 
 def test_remove_grouping_policy():
     # Not implemented
     result = e.remove_grouping_policy('group1', 'data2_admin')
-    assert result == True
+    assert result is True
     result = e.has_grouping_policy('group1', 'data2_admin')
-    assert result == False
+    assert result is False
 
 
 def test_remove_grouping_policies():
@@ -247,7 +247,7 @@ def test_remove_grouping_policies():
     result = e.remove_grouping_policies([
         ['group1', 'data2_admin']
     ])
-    assert result == False
+    assert result is False
 
 
 def test_remove_filtered_grouping_policy():
@@ -265,7 +265,7 @@ def test_remove_named_grouping_policies():
         ['jack', 'data5_admin']
     ])
 
-    assert result == False
+    assert result is False
 
 
 def test_remove_named_grouping_policy():
@@ -280,11 +280,11 @@ def test_update_policy():
     result = e.get_policy()
     assert result == [['sam', 'files', 'read']]
     result = e.update_policy(['sam', 'files', 'read'], ['sam', 'files', 'write'])
-    assert result == True
+    assert result is True
 
 
 def test_update_policies():
     # not implemented
     result = e.update_policies(['sam', 'files', 'read'], [
                                'sam', 'files', 'write'])
-    assert result == False
+    assert result is False
