@@ -2,7 +2,7 @@ import boto3
 from python_dycasbin import adapter
 from casbin.model.model import Model
 import casbin
-import python_dycasbin
+
 
 
 table_name = 'casbin_rule'
