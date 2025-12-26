@@ -182,7 +182,7 @@ def test_remove_filtered_policy():
 
 
 def test_remove_named_policy():
-    r = e.add_named_policy('p', 'david', 'files', 'read')
+    e.add_named_policy('p', 'david', 'files', 'read')
     result = e.remove_named_policy('p', 'david', 'files', 'read')
     assert result is True
     result = e.get_policy()
@@ -196,7 +196,7 @@ def test_remove_policies_case2():
 
 
 def test_remove_filtered_named_policy():
-    r = e.add_named_policy('p', 'david', 'images', 'write')
+    e.add_named_policy('p', 'david', 'images', 'write')
     result = e.remove_filtered_named_policy('p', 0, 'david', 'images', 'write')
     assert result is True
     result = e.get_policy()
