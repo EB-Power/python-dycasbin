@@ -192,7 +192,7 @@ def test_remove_named_policy():
 def test_remove_policies_case2():
     # Not implemented
     result = e.remove_named_policies('p', 'ham')
-    assert result == False
+    assert result is False
 
 
 def test_remove_filtered_named_policy():
