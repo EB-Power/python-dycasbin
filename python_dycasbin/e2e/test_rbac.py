@@ -29,14 +29,14 @@ def test_get_users_for_role():
 
 def test_has_role_for_user():
     result = e.has_role_for_user('ham', 'data_admin')
-    assert result == True
+    assert result is True
     result = e.has_role_for_user('sam', 'data_admin')
-    assert result == False
+    assert result is False
 
 
 def test_delete_role_for_user():
     result = e.delete_role_for_user('ham', 'data_admin')
-    assert result == True
+    assert result is True
 
 
 def test_delete_roles_for_user():
@@ -44,7 +44,7 @@ def test_delete_roles_for_user():
     result = e.delete_roles_for_user('ham')
     assert result == [['ham', 'data_admin']]
     result = e.has_role_for_user('ham', 'data_admin')
-    assert result == False
+    assert result is False
 
 
 def test_delete_user():
@@ -53,7 +53,7 @@ def test_delete_user():
     result = e.delete_user('ham')
     assert result == [['ham', 'data_admin']]
     result = e.has_role_for_user('ham', 'data_admin')
-    assert result == False
+    assert result is False
 
 
 def test_delete_role():
@@ -62,40 +62,40 @@ def test_delete_role():
     result = e.delete_role('data_admin')
     assert result == [['sam', 'data_admin']]
     result = e.has_role_for_user('sam', 'data_admin')
-    assert result == False
+    assert result is False
 
 
 def test_add_permission_for_user_case1():
     e.add_permission_for_user('bob', 'read')
     result = e.has_permission_for_user('bob', 'read')
-    assert result == True
+    assert result is True
 
 
 def test_delete_permission():
     e.add_permission_for_user('bob', 'read')
     result = e.delete_permission('read')
-    assert result == True
+    assert result is True
     result = e.has_permission_for_user('bob', 'read')
-    assert result == False
+    assert result is False
 
 
 def test_add_permission_for_user_case2():
     e.add_permission_for_user('alice', 'write')
     result = e.delete_permission_for_user('alice', 'write')
-    assert result == True
+    assert result is True
     result = e.has_permission_for_user('alice', 'write')
-    assert result == False
+    assert result is False
 
 
 def test_delete_permissions_for_user_case1():
     e.add_permission_for_user('alice', 'write')
     e.add_permission_for_user('alice', 'read')
     result = e.delete_permissions_for_user('alice')
-    assert result == True
+    assert result is True
     result = e.has_permission_for_user('alice', 'write')
-    assert result == False
+    assert result is False
     result = e.has_permission_for_user('alice', 'read')
-    assert result == False
+    assert result is False
 
 
 def test_delete_permissions_for_user_case2():
