@@ -132,12 +132,12 @@ def test_get_filtered_grouping_policy():
     assert result == [['bob', 'admin']]
 
 
-def test_get_named_grouping_policy():
+def test_get_named_grouping_policy_case1():
     result = e.get_named_grouping_policy('g')
     assert result == [['bob', 'admin']]
 
 
-def test_get_named_grouping_policy():
+def test_get_named_grouping_policy_case2():
     result = e.get_filtered_named_grouping_policy('g', 0, 'bob')
     assert result == [['bob', 'admin']]
 
@@ -168,7 +168,7 @@ def test_remove_policy():
     assert result == [['alice', 'data5', 'read']]
 
 
-def test_remove_policies():
+def test_remove_policies_case1():
     # Not implemented
     result = e.remove_policies('ham')
     assert result is False
@@ -189,7 +189,7 @@ def test_remove_named_policy():
     assert result == []
 
 
-def test_remove_policies():
+def test_remove_policies_case2():
     # Not implemented
     result = e.remove_named_policies('p', 'ham')
     assert result == False
@@ -255,7 +255,7 @@ def test_remove_filtered_grouping_policy():
     assert result == []
 
 
-def test_remove_named_grouping_policy():
+def test_remove_named_grouping_policy_case1():
     pass
 
 
@@ -268,7 +268,7 @@ def test_remove_named_grouping_policies():
     assert result is False
 
 
-def test_remove_named_grouping_policy():
+def test_remove_named_grouping_policy_case2():
     e.add_grouping_policy('group1', 'data2_admin')
     result = e.remove_filtered_named_grouping_policy('g', 0, 'group1')
 
