@@ -1,11 +1,27 @@
-DynamoDB adopter for casbin
+# DynamoDB adopter for casbin
 
-Installation
-------------
-Run `pip install python-dycasbin`
+## Installation
 
-Usage
------
+### From Source
+
+```bash
+uv build
+```
+
+### From pypi
+
+```bash
+# with uv
+uv add python-dycasbin
+```
+
+```bash
+# with pip
+pip install python-dycasbin
+```
+
+## Usage
+
 ```python
 import casbin
 from python_dycasbin import adapter
@@ -22,8 +38,3 @@ if e.enforce(sub, obj, act):
 else:
     print("Deny")
 ```
-
-Running tests
----------------
-* Install [pytest](https://pypi.org/project/pytest/) and [pytest-mock](https://pypi.org/project/pytest-mock/)
-* Run `pytest` from project root
