@@ -54,7 +54,7 @@ class TestRBAC(unittest.TestCase):
         self.e.add_role_for_user("test_delete_roles_for_user", "data_admin")
         result = self.e.delete_roles_for_user("test_delete_roles_for_user")
         self.assertIsNot(False, result)
-        self.assertIn(["test_delete_roles_for_user", "data_admin"], result) # type: ignore
+        self.assertIn(["test_delete_roles_for_user", "data_admin"], result)  # type: ignore
         result = self.e.has_role_for_user("test_delete_roles_for_user", "data_admin")
         self.assertFalse(result)
 
