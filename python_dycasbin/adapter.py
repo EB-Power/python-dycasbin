@@ -26,9 +26,9 @@ class Adapter(persist.Adapter):
         *,
         table_create_table: bool = True,
         table_definition: dict | None = None,
-        table_provisioned_read_capacity: int = 10,
-        table_provisioned_write_capacity: int = 10,
-        table_billing_mode: str = "PAY_PER_REQUEST",
+        table_provisioned_read_capacity: int | None = 10,
+        table_provisioned_write_capacity: int | None = 10,
+        table_billing_mode: str = "PROVISIONED",
         aws_endpoint_url: str | None = None,
         aws_region_name: str | None = None,
         aws_access_key_id: str | None = None,
@@ -80,22 +80,25 @@ class Adapter(persist.Adapter):
         self,
         table_name: str,
         table_definition: dict | None,
-        provisioned_read_capacity: int,
-        provisioned_write_capacity: int,
+        provisioned_read_capacity: int | None,
+        provisioned_write_capacity: int | None,
         table_billing_mode: str,
     ) -> None:
         """Provision the dynamodb table"""
-        table_attribute_dfinitions = [
+        if table_definition is None:
+            table_definition = {"TableName": table_name}
+
+        table_definition["AttributeDefinitions"] = [
             {"AttributeName": "id", "AttributeType": "S"},
             {"AttributeName": "v0", "AttributeType": "S"},
             {"AttributeName": "v1", "AttributeType": "S"},
         ]
 
-        table_key_schema = [
+        table_definition["KeySchema"] = [
             {"AttributeName": "id", "KeyType": "HASH"},
         ]
 
-        table_global_secondary_indexes = [
+        table_definition["GlobalSecondaryIndexes"] = [
             {
                 "IndexName": "v0-v1-index",
                 "KeySchema": [
@@ -118,25 +121,21 @@ class Adapter(persist.Adapter):
             },
         ]
 
-        table_provisioned_throughput = {
-            "ReadCapacityUnits": provisioned_read_capacity,
-            "WriteCapacityUnits": provisioned_write_capacity,
-        }
+        if (
+            provisioned_read_capacity
+            and provisioned_write_capacity
+            and table_billing_mode == "PROVISIONED"
+        ):
+            table_definition["ProvisionedThroughput"] = {
+                "ReadCapacityUnits": provisioned_read_capacity,
+                "WriteCapacityUnits": provisioned_write_capacity,
+            }
 
-        dynamodb = self._get_db_handler()
+        table_definition["BillingMode"] = table_billing_mode
 
         try:
-            if table_definition is not None:
-                dynamodb.create_table(**table_definition)
-            else:
-                dynamodb.create_table(
-                    TableName=table_name,
-                    AttributeDefinitions=table_attribute_dfinitions,
-                    KeySchema=table_key_schema,
-                    ProvisionedThroughput=table_provisioned_throughput,
-                    GlobalSecondaryIndexes=table_global_secondary_indexes,
-                    BillingMode=table_billing_mode,
-                )
+            dynamodb = self._get_db_handler()
+            dynamodb.create_table(**table_definition)
         except dynamodb.exceptions.ResourceInUseException:
             pass
 
