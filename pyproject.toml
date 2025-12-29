@@ -1,6 +1,6 @@
 [project]
 name = "python-dycasbin"
-version = "0.4.2"
+version = "0.4.3"
 description = "DynamoDB adopter for casbin"
 readme = "README.md"
 authors = [
