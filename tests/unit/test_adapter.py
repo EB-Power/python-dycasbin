@@ -22,7 +22,7 @@ class TestAdapter(unittest.TestCase):
         self.aws_verify = False
 
     @patch("python_dycasbin.adapter.boto3.client")
-    def test_create_table(self, mock_client):
+    def test_create_table_provisioned(self, mock_client):
         _ = adapter.Adapter(
             table_name=self.table_name,
             aws_endpoint_url=self.aws_endpoint_url,
@@ -46,14 +46,14 @@ class TestAdapter(unittest.TestCase):
         )
 
         mock_client.return_value.create_table.assert_called_once_with(
-            TableName=self.table_name,
+            TableName="casbin_rule",
+            BillingMode="PROVISIONED",
+            KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
             AttributeDefinitions=[
                 {"AttributeName": "id", "AttributeType": "S"},
                 {"AttributeName": "v0", "AttributeType": "S"},
                 {"AttributeName": "v1", "AttributeType": "S"},
             ],
-            KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
-            ProvisionedThroughput={"ReadCapacityUnits": 10, "WriteCapacityUnits": 10},
             GlobalSecondaryIndexes=[
                 {
                     "IndexName": "v0-v1-index",
@@ -62,6 +62,10 @@ class TestAdapter(unittest.TestCase):
                         {"AttributeName": "v1", "KeyType": "RANGE"},
                     ],
                     "Projection": {"ProjectionType": "ALL"},
+                    "ProvisionedThroughput": {
+                        "ReadCapacityUnits": 10,
+                        "WriteCapacityUnits": 10,
+                    },
                 },
                 {
                     "IndexName": "v1-v0-index",
@@ -70,9 +74,76 @@ class TestAdapter(unittest.TestCase):
                         {"AttributeName": "v0", "KeyType": "RANGE"},
                     ],
                     "Projection": {"ProjectionType": "ALL"},
+                    "ProvisionedThroughput": {
+                        "ReadCapacityUnits": 10,
+                        "WriteCapacityUnits": 10,
+                    },
                 },
             ],
+            ProvisionedThroughput={"ReadCapacityUnits": 10, "WriteCapacityUnits": 10},
+        )
+
+    @patch("python_dycasbin.adapter.boto3.client")
+    def test_create_table_ondemand(self, mock_client):
+        _ = adapter.Adapter(
+            table_name=self.table_name,
+            table_billing_mode="PAY_PER_REQUEST",
+            aws_endpoint_url=self.aws_endpoint_url,
+            aws_region_name=self.aws_region_name,
+            aws_access_key_id=self.aws_access_key_id,
+            aws_secret_access_key=self.aws_secret_access_key,
+            aws_use_ssl=self.aws_use_ssl,
+            aws_verify=self.aws_verify,
+        )
+
+        mock_client.assert_called_once_with(
+            "dynamodb",
+            region_name="us-east-1",
+            use_ssl=False,
+            verify=False,
+            endpoint_url="http://localhost:8000",
+            aws_access_key_id="anything",
+            aws_secret_access_key="anything",
+            aws_session_token=None,
+            aws_account_id=None,
+        )
+
+        mock_client.return_value.create_table.assert_called_once_with(
+            TableName="casbin_rule",
             BillingMode="PAY_PER_REQUEST",
+            KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
+            AttributeDefinitions=[
+                {"AttributeName": "id", "AttributeType": "S"},
+                {"AttributeName": "v0", "AttributeType": "S"},
+                {"AttributeName": "v1", "AttributeType": "S"},
+            ],
+            GlobalSecondaryIndexes=[
+                {
+                    "IndexName": "v0-v1-index",
+                    "KeySchema": [
+                        {"AttributeName": "v0", "KeyType": "HASH"},
+                        {"AttributeName": "v1", "KeyType": "RANGE"},
+                    ],
+                    "Projection": {"ProjectionType": "ALL"},
+                    "OnDemandThroughput": {
+                        "MaxReadRequestUnits": 10,
+                        "MaxWriteRequestUnits": 10,
+                    },
+                },
+                {
+                    "IndexName": "v1-v0-index",
+                    "KeySchema": [
+                        {"AttributeName": "v1", "KeyType": "HASH"},
+                        {"AttributeName": "v0", "KeyType": "RANGE"},
+                    ],
+                    "Projection": {"ProjectionType": "ALL"},
+                    "OnDemandThroughput": {
+                        "MaxReadRequestUnits": 10,
+                        "MaxWriteRequestUnits": 10,
+                    },
+                },
+            ],
+            OnDemandThroughput={"MaxReadRequestUnits": 10, "MaxWriteRequestUnits": 10},
         )
 
     @patch("python_dycasbin.adapter.boto3.client")

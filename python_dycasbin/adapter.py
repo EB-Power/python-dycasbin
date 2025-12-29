@@ -26,12 +26,11 @@ class Adapter(persist.Adapter):
         *,
         table_create_table: bool = True,
         table_definition: dict | None = None,
-        table_provisioned_read_capacity: int | None = 10,
-        table_provisioned_write_capacity: int | None = 10,
+        table_read_capacity: int | None = 10,
+        table_write_capacity: int | None = 10,
         table_billing_mode: str = "PROVISIONED",
-        table_gsi_provisioned_read_capacity: int | None = 10,
-        table_gsi_provisioned_write_capacity: int | None = 10,
-        table_gsi_billing_mode: str = "PROVISIONED",
+        table_gsi_read_capacity: int | None = 10,
+        table_gsi_write_capacity: int | None = 10,
         aws_endpoint_url: str | None = None,
         aws_region_name: str | None = None,
         aws_access_key_id: str | None = None,
@@ -58,12 +57,11 @@ class Adapter(persist.Adapter):
             self._provision_table(
                 table_name,
                 table_definition,
-                table_provisioned_read_capacity,
-                table_provisioned_write_capacity,
                 table_billing_mode,
-                table_gsi_provisioned_read_capacity,
-                table_gsi_provisioned_write_capacity,
-                table_gsi_billing_mode,
+                table_read_capacity,
+                table_write_capacity,
+                table_gsi_read_capacity,
+                table_gsi_write_capacity,
             )
 
     @cached(cache=TTLCache(maxsize=1, ttl=300))
@@ -86,12 +84,11 @@ class Adapter(persist.Adapter):
         self,
         table_name: str,
         table_definition: dict | None,
+        table_billing_mode: str,
         table_provisioned_read_capacity: int | None,
         table_provisioned_write_capacity: int | None,
-        table_billing_mode: str,
-        gsi_provisioned_read_capacity: int | None,
-        gsi_provisioned_write_capacity: int | None,
-        gsi_billing_mode: str,
+        gsi_read_capacity: int | None = -1,
+        gsi_write_capacity: int | None = -1,
     ) -> None:
         """Provision the dynamodb table"""
         if table_definition is None:
@@ -118,7 +115,6 @@ class Adapter(persist.Adapter):
                         "Projection": {
                             "ProjectionType": "ALL",
                         },
-                        "BillingMode": gsi_billing_mode,
                     },
                     {
                         "IndexName": "v1-v0-index",
@@ -129,35 +125,44 @@ class Adapter(persist.Adapter):
                         "Projection": {
                             "ProjectionType": "ALL",
                         },
-                        "BillingMode": gsi_billing_mode,
                     },
                 ],
             }
 
         # Set table ProvisionedThroughput
         if (
-            table_provisioned_read_capacity
-            and table_provisioned_write_capacity
-            and table_billing_mode == "PROVISIONED"
+            table_billing_mode == "PROVISIONED"
+            or table_billing_mode == "ProvisionedThroughput"
         ):
             table_definition["ProvisionedThroughput"] = {
                 "ReadCapacityUnits": table_provisioned_read_capacity,
                 "WriteCapacityUnits": table_provisioned_write_capacity,
             }
-
-        # Set gsi ProvisionedThroughput
-        if (
-            gsi_provisioned_read_capacity
-            and gsi_provisioned_write_capacity
-            and gsi_billing_mode == "PROVISIONED"
-        ):
             table_definition["GlobalSecondaryIndexes"][0]["ProvisionedThroughput"] = {
-                "ReadCapacityUnits": gsi_provisioned_read_capacity,
-                "WriteCapacityUnits": gsi_provisioned_write_capacity,
+                "ReadCapacityUnits": gsi_read_capacity,
+                "WriteCapacityUnits": gsi_write_capacity,
             }
             table_definition["GlobalSecondaryIndexes"][1]["ProvisionedThroughput"] = {
-                "ReadCapacityUnits": gsi_provisioned_read_capacity,
-                "WriteCapacityUnits": gsi_provisioned_write_capacity,
+                "ReadCapacityUnits": gsi_read_capacity,
+                "WriteCapacityUnits": gsi_write_capacity,
+            }
+
+        # Set gsi ProvisionedThroughput
+        elif (
+            table_billing_mode == "PAY_PER_REQUEST"
+            or table_billing_mode == "OnDemandThroughput"
+        ):
+            table_definition["OnDemandThroughput"] = {
+                "MaxReadRequestUnits": table_provisioned_read_capacity,
+                "MaxWriteRequestUnits": table_provisioned_write_capacity,
+            }
+            table_definition["GlobalSecondaryIndexes"][0]["OnDemandThroughput"] = {
+                "MaxReadRequestUnits": gsi_read_capacity,
+                "MaxWriteRequestUnits": gsi_write_capacity,
+            }
+            table_definition["GlobalSecondaryIndexes"][1]["OnDemandThroughput"] = {
+                "MaxReadRequestUnits": gsi_read_capacity,
+                "MaxWriteRequestUnits": gsi_write_capacity,
             }
 
         try:
