@@ -277,7 +277,7 @@ wheels = [
 
 [[package]]
 name = "python-dycasbin"
-version = "0.3.2"
+version = "0.4.2"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
@@ -297,7 +297,7 @@ dev = [
 requires-dist = [
     { name = "boto3", specifier = ">=1.40.0,<2" },
     { name = "cachetools", specifier = ">=6.2.0,<7" },
-    { name = "casbin", specifier = "==1.14.0,<2" },
+    { name = "casbin", specifier = ">=1.14.0,<2" },
 ]
 
 [package.metadata.requires-dev]
