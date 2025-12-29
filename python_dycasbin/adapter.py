@@ -29,6 +29,9 @@ class Adapter(persist.Adapter):
         table_provisioned_read_capacity: int | None = 10,
         table_provisioned_write_capacity: int | None = 10,
         table_billing_mode: str = "PROVISIONED",
+        table_gsi_provisioned_read_capacity: int | None = 10,
+        table_gsi_provisioned_write_capacity: int | None = 10,
+        table_gsi_billing_mode: str = "PROVISIONED",
         aws_endpoint_url: str | None = None,
         aws_region_name: str | None = None,
         aws_access_key_id: str | None = None,
@@ -58,6 +61,9 @@ class Adapter(persist.Adapter):
                 table_provisioned_read_capacity,
                 table_provisioned_write_capacity,
                 table_billing_mode,
+                table_gsi_provisioned_read_capacity,
+                table_gsi_provisioned_write_capacity,
+                table_gsi_billing_mode,
             )
 
     @cached(cache=TTLCache(maxsize=1, ttl=300))
@@ -80,58 +86,79 @@ class Adapter(persist.Adapter):
         self,
         table_name: str,
         table_definition: dict | None,
-        provisioned_read_capacity: int | None,
-        provisioned_write_capacity: int | None,
+        table_provisioned_read_capacity: int | None,
+        table_provisioned_write_capacity: int | None,
         table_billing_mode: str,
+        gsi_provisioned_read_capacity: int | None,
+        gsi_provisioned_write_capacity: int | None,
+        gsi_billing_mode: str,
     ) -> None:
         """Provision the dynamodb table"""
         if table_definition is None:
-            table_definition = {"TableName": table_name}
-
-        table_definition["AttributeDefinitions"] = [
-            {"AttributeName": "id", "AttributeType": "S"},
-            {"AttributeName": "v0", "AttributeType": "S"},
-            {"AttributeName": "v1", "AttributeType": "S"},
-        ]
-
-        table_definition["KeySchema"] = [
-            {"AttributeName": "id", "KeyType": "HASH"},
-        ]
-
-        table_definition["GlobalSecondaryIndexes"] = [
-            {
-                "IndexName": "v0-v1-index",
+            # Table definition
+            # see (https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb/client/create_table.html)
+            table_definition = {
+                "TableName": table_name,
+                "BillingMode": table_billing_mode,
                 "KeySchema": [
-                    {"AttributeName": "v0", "KeyType": "HASH"},
-                    {"AttributeName": "v1", "KeyType": "RANGE"},
+                    {"AttributeName": "id", "KeyType": "HASH"},
                 ],
-                "Projection": {
-                    "ProjectionType": "ALL",
-                },
-            },
-            {
-                "IndexName": "v1-v0-index",
-                "KeySchema": [
-                    {"AttributeName": "v1", "KeyType": "HASH"},
-                    {"AttributeName": "v0", "KeyType": "RANGE"},
+                "AttributeDefinitions": [
+                    {"AttributeName": "id", "AttributeType": "S"},
+                    {"AttributeName": "v0", "AttributeType": "S"},
+                    {"AttributeName": "v1", "AttributeType": "S"},
                 ],
-                "Projection": {
-                    "ProjectionType": "ALL",
-                },
-            },
-        ]
+                "GlobalSecondaryIndexes": [
+                    {
+                        "IndexName": "v0-v1-index",
+                        "KeySchema": [
+                            {"AttributeName": "v0", "KeyType": "HASH"},
+                            {"AttributeName": "v1", "KeyType": "RANGE"},
+                        ],
+                        "Projection": {
+                            "ProjectionType": "ALL",
+                        },
+                        "BillingMode": gsi_billing_mode,
+                    },
+                    {
+                        "IndexName": "v1-v0-index",
+                        "KeySchema": [
+                            {"AttributeName": "v1", "KeyType": "HASH"},
+                            {"AttributeName": "v0", "KeyType": "RANGE"},
+                        ],
+                        "Projection": {
+                            "ProjectionType": "ALL",
+                        },
+                        "BillingMode": gsi_billing_mode,
+                    },
+                ],
+            }
 
+        # Set table ProvisionedThroughput
         if (
-            provisioned_read_capacity
-            and provisioned_write_capacity
+            table_provisioned_read_capacity
+            and table_provisioned_write_capacity
             and table_billing_mode == "PROVISIONED"
         ):
             table_definition["ProvisionedThroughput"] = {
-                "ReadCapacityUnits": provisioned_read_capacity,
-                "WriteCapacityUnits": provisioned_write_capacity,
+                "ReadCapacityUnits": table_provisioned_read_capacity,
+                "WriteCapacityUnits": table_provisioned_write_capacity,
             }
 
-        table_definition["BillingMode"] = table_billing_mode
+        # Set gsi ProvisionedThroughput
+        if (
+            gsi_provisioned_read_capacity
+            and gsi_provisioned_write_capacity
+            and gsi_billing_mode == "PROVISIONED"
+        ):
+            table_definition["GlobalSecondaryIndexes"][0]["ProvisionedThroughput"] = {
+                "ReadCapacityUnits": gsi_provisioned_read_capacity,
+                "WriteCapacityUnits": gsi_provisioned_write_capacity,
+            }
+            table_definition["GlobalSecondaryIndexes"][1]["ProvisionedThroughput"] = {
+                "ReadCapacityUnits": gsi_provisioned_read_capacity,
+                "WriteCapacityUnits": gsi_provisioned_write_capacity,
+            }
 
         try:
             dynamodb = self._get_db_handler()
