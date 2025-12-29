@@ -73,7 +73,7 @@ class Adapter(persist.Adapter):
             aws_secret_access_key=self.aws_secret_access_key,
             aws_session_token=self.aws_session_token,
             aws_account_id=self.aws_account_id,
-        )  # type: ignore
+        )
         return dynamodb
 
     def _provision_table(
