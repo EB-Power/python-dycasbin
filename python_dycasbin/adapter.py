@@ -165,8 +165,9 @@ class Adapter(persist.Adapter):
                 "MaxWriteRequestUnits": gsi_write_capacity,
             }
 
+        dynamodb = self._get_db_handler()
+
         try:
-            dynamodb = self._get_db_handler()
             dynamodb.create_table(**table_definition)
         except dynamodb.exceptions.ResourceInUseException:
             pass
